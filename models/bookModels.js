@@ -9,9 +9,9 @@ const bookModel = new Schema(
     imageLink: { type: String },
     language: { type: String },
     link: { type: String },
-    pages: { type: String },
+    pages: { type: Number },
     title: { type: String },
-    year: { type: String },
+    year: { type: Number },
   }
 );
 
