@@ -3,27 +3,31 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const app = express();
-const db = mongoose.connect('mongodb://localhost/bookAPI', { useUnifiedTopology: true });
+
+if (process.env.ENV === 'Test') {
+  console.log('This is a test');
+  const db = mongoose.connect('mongodb://localhost/bookAPI_Test');
+} else {
+  console.log('This is for real');
+  const db = mongoose.connect('mongodb://localhost/bookAPI-prod');
+}
 
 
 const port = process.env.PORT || 3000;
 const Book = require('./models/bookModels');
-
 const bookRouter = require('./routes/bookRouter')(Book);
 
-app.use(bodyParser.urlencoded({ extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-
-
 
 app.use('/api', bookRouter);
 
-
 app.get('/', (req, res) => {
-  res.send('Welcome to my API Dexter ewe wss')
+  res.send('Welcome to my Nodemon API!');
 });
 
-app.listen(port, () => {
-  console.log('Running server' + port);
+app.server = app.listen(port, () => {
+  console.log(`Running on port ${port}`);
 });
+
+module.exports = app;
