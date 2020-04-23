@@ -1,15 +1,13 @@
-const express = require("express");
+/* eslint-disable no-param-reassign */
+const express = require('express');
 const booksController = require('../controllers/booksController');
 
 function routes(Book) {
   const bookRouter = express.Router();
   const controller = booksController(Book);
-  bookRouter.route("/books")
-    // Post content
+  bookRouter.route('/books')
     .post(controller.post)
-    // Get content
     .get(controller.get);
-
   bookRouter.use('/books/:bookId', (req, res, next) => {
     Book.findById(req.params.bookId, (err, book) => {
       if (err) {
@@ -22,39 +20,35 @@ function routes(Book) {
       return res.sendStatus(404);
     });
   });
-
   bookRouter.route('/books/:bookId')
     .get((req, res) => {
-      res.json(req.book)
+      const returnBook = req.book.toJSON();
+
+      returnBook.links = {};
+      const genre = req.book.genre.replace(' ', '%20');
+      returnBook.links.FilterByThisGenre = `http://${req.headers.host}/api/books/?genre=${genre}`;
+      res.json(returnBook);
     })
     .put((req, res) => {
-
       const { book } = req;
       book.title = req.body.title;
       book.author = req.body.author;
-      book.country = req.body.country;
-      book.imageLink = req.body.imageLink;
-      book.language = req.body.language;
-      book.link = req.body.link;
-      book.pages = req.body.pages;
-      book.title = req.body.title;
-      book.year = req.body.year;
+      book.genre = req.body.genre;
+      book.read = req.body.read;
       req.book.save((err) => {
         if (err) {
           return res.send(err);
         }
-        return res.json(book)
+        return res.json(book);
       });
     })
-
-    // Get patch
-
     .patch((req, res) => {
       const { book } = req;
+      // eslint-disable-next-line no-underscore-dangle
       if (req.body._id) {
+        // eslint-disable-next-line no-underscore-dangle
         delete req.body._id;
       }
-
       Object.entries(req.body).forEach((item) => {
         const key = item[0];
         const value = item[1];
@@ -64,12 +58,9 @@ function routes(Book) {
         if (err) {
           return res.send(err);
         }
-        return res.json(book)
+        return res.json(book);
       });
     })
-
-    // Get delete
-
     .delete((req, res) => {
       req.book.remove((err) => {
         if (err) {
